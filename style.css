@@ -103,6 +103,19 @@ html, body {
   z-index: 1;
 }
 
+.cursor-spotlight {
+  position: absolute;
+  width: 650px;
+  height: 650px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 40%, transparent 70%);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity 0.4s ease;
+  mix-blend-mode: screen;
+}
+
 .video-overlay {
   position: absolute;
   inset: 0;
@@ -215,126 +228,69 @@ html, body {
 }
 
 /* --------------------------------------------------------
-   Avatar with Concentric Status Ring & Discord Badge
+   Avatar with Pure Glowing Aura (Guns.lol Aesthetic)
    -------------------------------------------------------- */
 .avatar-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 0 auto 16px;
+  margin: 0 auto 18px;
   width: 100%;
+  position: relative;
+  z-index: 2;
 }
 
 .avatar-wrapper {
   position: relative;
-  width: 96px;
-  height: 96px;
+  width: 104px;
+  height: 104px;
   display: grid;
-  place-items: center; /* 100% mathematical concentric centering */
-  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  place-items: center;
+  cursor: pointer;
+  transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .avatar-wrapper:hover {
-  transform: scale(1.05);
+  transform: scale(1.08) rotate(1.5deg);
 }
 
 /* Background Ambient Glow */
 .avatar-glow {
   grid-area: 1 / 1;
-  width: 104px;
-  height: 104px;
+  width: 116px;
+  height: 116px;
   border-radius: 50%;
-  background: radial-gradient(circle, var(--discord-status-glow, var(--accent-glow)) 0%, transparent 72%);
-  opacity: 0.55;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.15) 50%, transparent 72%);
+  opacity: 0.65;
   z-index: 0;
-  filter: blur(10px);
+  filter: blur(14px);
   pointer-events: none;
-  animation: pulse-avatar 3.5s ease-in-out infinite;
-  transition: background 0.4s ease;
+  animation: pulse-avatar-aura 3.6s ease-in-out infinite alternate;
 }
 
-/* Concentric Outer Status Ring */
-.avatar-ring {
-  grid-area: 1 / 1;
-  width: 96px;
-  height: 96px;
-  border-radius: 50%;
-  border: 2.5px solid var(--discord-status-color, rgba(255, 255, 255, 0.25));
-  box-shadow: 0 0 16px var(--discord-status-glow, rgba(255, 255, 255, 0.12));
-  pointer-events: none;
-  z-index: 2;
-  box-sizing: border-box;
-  transition: border-color 0.4s ease, box-shadow 0.4s ease;
+@keyframes pulse-avatar-aura {
+  0% { opacity: 0.45; transform: scale(0.96); filter: blur(12px); }
+  100% { opacity: 0.85; transform: scale(1.06); filter: blur(16px); }
 }
 
 /* Centered Avatar Image */
 .avatar-img {
   grid-area: 1 / 1;
-  width: 82px;
-  height: 82px;
+  width: 94px;
+  height: 94px;
   object-fit: cover;
   border-radius: 50%;
-  border: 2.5px solid rgba(18, 18, 24, 0.95);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65);
+  border: 2.5px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 0 28px rgba(255, 255, 255, 0.25), 0 14px 35px rgba(0, 0, 0, 0.85);
   z-index: 1;
   display: block;
   box-sizing: border-box;
-  transition: opacity 0.3s ease;
+  transition: border-color 0.35s ease, box-shadow 0.35s ease;
 }
 
-/* Discord Status Badge Dot on bottom-right corner */
-.status-badge {
-  position: absolute;
-  bottom: 2px;
-  right: 2px;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background-color: var(--discord-status-color, #80848e);
-  border: 3.5px solid #121218;
-  z-index: 4;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
-  transition: background-color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
-}
-
-.status-badge-inner {
-  display: block;
-  pointer-events: none;
-}
-
-/* DND horizontal bar */
-.status-badge.status-dnd .status-badge-inner {
-  width: 8px;
-  height: 2.5px;
-  background-color: #121218;
-  border-radius: 2px;
-}
-
-/* Idle crescent or inner hollow */
-.status-badge.status-idle .status-badge-inner {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background-color: transparent;
-  box-shadow: -2.5px -2.5px 0 0 #121218;
-  transform: rotate(-15deg);
-}
-
-/* Offline hollow center */
-.status-badge.status-offline .status-badge-inner {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background-color: #121218;
-}
-
-@keyframes pulse-avatar {
-  0%, 100% { opacity: 0.35; transform: scale(0.98); }
-  50% { opacity: 0.75; transform: scale(1.03); }
+.avatar-wrapper:hover .avatar-img {
+  border-color: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 0 40px rgba(255, 255, 255, 0.55), 0 16px 45px rgba(0, 0, 0, 0.95);
 }
 
 /* User Meta */

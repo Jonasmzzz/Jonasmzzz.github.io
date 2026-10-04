@@ -16,11 +16,11 @@ const CONFIG = {
     "viewsStart": 305
   },
   "discord": {
-    "enabled": true,
+    "enabled": false,
     "userId": "453756683886264321",
-    "useDiscordAvatar": true,
-    "showStatusRing": true,
-    "showPresenceCard": true
+    "useDiscordAvatar": false,
+    "showStatusRing": false,
+    "showPresenceCard": false
   },
   "media": {
     "videoSrc": "assets/bg-video.mp4",

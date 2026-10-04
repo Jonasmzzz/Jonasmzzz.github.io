@@ -1133,40 +1133,74 @@ const CONFIG = ${JSON.stringify(activeConfig, null, 2)};
 });
 
 // ----------------------------------------------------
-// 3D CARD PARALLAX TILT & SPECULAR HIGHLIGHT
+// 3D CARD PARALLAX TILT, CURSOR SPOTLIGHT & CLICK SPARKLES
 // ----------------------------------------------------
+let globalMouse = { x: -1000, y: -1000 };
+
 function initCardInteractiveEffects() {
   const card = document.getElementById("profile-card");
-  if (!card) return;
-
-  let isHovered = false;
+  const spotlight = document.getElementById("cursor-spotlight");
 
   window.addEventListener("mousemove", (e) => {
-    const rect = card.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    globalMouse.x = e.clientX;
+    globalMouse.y = e.clientY;
 
-    card.style.setProperty("--mouse-x", `${x}px`);
-    card.style.setProperty("--mouse-y", `${y}px`);
+    if (spotlight) {
+      spotlight.style.left = `${e.clientX}px`;
+      spotlight.style.top = `${e.clientY}px`;
+    }
 
-    const cardCenterX = rect.left + rect.width / 2;
-    const cardCenterY = rect.top + rect.height / 2;
-    const distX = (e.clientX - cardCenterX) / (window.innerWidth / 2);
-    const distY = (e.clientY - cardCenterY) / (window.innerHeight / 2);
+    if (card) {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
 
-    const tiltX = -distY * 7;
-    const tiltY = distX * 7;
+      card.style.setProperty("--mouse-x", `${x}px`);
+      card.style.setProperty("--mouse-y", `${y}px`);
 
-    card.style.transform = `perspective(1000px) rotateX(${tiltX.toFixed(2)}deg) rotateY(${tiltY.toFixed(2)}deg)`;
+      const cardCenterX = rect.left + rect.width / 2;
+      const cardCenterY = rect.top + rect.height / 2;
+      const distX = (e.clientX - cardCenterX) / (window.innerWidth / 2);
+      const distY = (e.clientY - cardCenterY) / (window.innerHeight / 2);
+
+      const tiltX = -distY * 7;
+      const tiltY = distX * 7;
+
+      card.style.transform = `perspective(1000px) rotateX(${tiltX.toFixed(2)}deg) rotateY(${tiltY.toFixed(2)}deg)`;
+    }
   });
 
   window.addEventListener("mouseleave", () => {
-    card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg)`;
+    if (card) card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg)`;
+  });
+
+  // Interactive Click Sparkle Particle Burst
+  window.addEventListener("click", (e) => {
+    spawnClickSparkles(e.clientX, e.clientY);
   });
 }
 
+const sparkleParticles = [];
+function spawnClickSparkles(x, y) {
+  const count = 12;
+  for (let i = 0; i < count; i++) {
+    const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5);
+    const speed = Math.random() * 3 + 1.5;
+    sparkleParticles.push({
+      x,
+      y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      radius: Math.random() * 2 + 1,
+      alpha: 1,
+      decay: Math.random() * 0.025 + 0.02,
+      color: "#ffffff"
+    });
+  }
+}
+
 // ----------------------------------------------------
-// DYNAMIC AMBIENT CANVAS (Stars or Snow)
+// DYNAMIC AMBIENT CANVAS (Constellation Stars & Sparkles)
 // ----------------------------------------------------
 function initAmbientCanvas() {
   const canvas = document.getElementById("ambient-canvas");
@@ -1181,18 +1215,18 @@ function initAmbientCanvas() {
     height = canvas.height = window.innerHeight;
   });
 
-  const numParticles = 65;
+  const numParticles = 80;
   const particles = [];
 
   for (let i = 0; i < numParticles; i++) {
     particles.push({
       x: Math.random() * width,
       y: Math.random() * height,
-      radius: Math.random() * 1.5 + 0.5,
-      speedX: (Math.random() - 0.5) * 0.3,
-      speedY: (Math.random() - 0.5) * 0.3,
-      alpha: Math.random() * 0.7 + 0.2,
-      pulseSpeed: Math.random() * 0.02 + 0.005,
+      radius: Math.random() * 1.8 + 0.6,
+      speedX: (Math.random() - 0.5) * 0.35,
+      speedY: (Math.random() - 0.5) * 0.35,
+      alpha: Math.random() * 0.8 + 0.2,
+      pulseSpeed: Math.random() * 0.025 + 0.008,
     });
   }
 
@@ -1204,14 +1238,14 @@ function initAmbientCanvas() {
       return;
     }
 
+    // 1. Draw Star Particles & Constellations
     for (let i = 0; i < particles.length; i++) {
       const p = particles[i];
 
       if (ambientMode === "snow") {
-        p.y += Math.abs(p.speedY) + 0.4;
+        p.y += Math.abs(p.speedY) + 0.5;
         p.x += Math.sin(Date.now() * 0.001 + i) * 0.3;
       } else {
-        // stars
         p.x += p.speedX;
         p.y += p.speedY;
       }
@@ -1221,14 +1255,48 @@ function initAmbientCanvas() {
       if (p.y < 0) p.y = height;
       if (p.y > height) p.y = 0;
 
-      p.alpha += Math.sin(Date.now() * p.pulseSpeed) * 0.005;
-      const displayAlpha = Math.max(0.1, Math.min(0.9, p.alpha));
+      p.alpha += Math.sin(Date.now() * p.pulseSpeed) * 0.006;
+      const displayAlpha = Math.max(0.15, Math.min(0.95, p.alpha));
+
+      // Draw connections when near mouse cursor
+      const dxMouse = globalMouse.x - p.x;
+      const dyMouse = globalMouse.y - p.y;
+      const distMouse = Math.sqrt(dxMouse * dxMouse + dyMouse * dyMouse);
+      if (distMouse < 130) {
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y);
+        ctx.lineTo(globalMouse.x, globalMouse.y);
+        ctx.strokeStyle = `rgba(255, 255, 255, ${0.18 * (1 - distMouse / 130)})`;
+        ctx.lineWidth = 0.8;
+        ctx.stroke();
+      }
 
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
       ctx.fillStyle = `rgba(255, 255, 255, ${displayAlpha})`;
-      ctx.shadowBlur = ambientMode === "stars" ? 8 : 2;
-      ctx.shadowColor = "rgba(255, 255, 255, 0.8)";
+      ctx.shadowBlur = ambientMode === "stars" ? 10 : 3;
+      ctx.shadowColor = "rgba(255, 255, 255, 0.9)";
+      ctx.fill();
+    }
+
+    // 2. Draw & Update Click Sparkles
+    for (let i = sparkleParticles.length - 1; i >= 0; i--) {
+      const sp = sparkleParticles[i];
+      sp.x += sp.vx;
+      sp.y += sp.vy;
+      sp.vy += 0.04; // subtle gravity
+      sp.alpha -= sp.decay;
+
+      if (sp.alpha <= 0) {
+        sparkleParticles.splice(i, 1);
+        continue;
+      }
+
+      ctx.beginPath();
+      ctx.arc(sp.x, sp.y, sp.radius, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255, 255, 255, ${sp.alpha})`;
+      ctx.shadowBlur = 12;
+      ctx.shadowColor = "rgba(255, 255, 255, 1)";
       ctx.fill();
     }
 
