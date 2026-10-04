@@ -13,7 +13,7 @@ const CONFIG = {
     "location": "FFM",
     "badge": "VIP",
     "avatar": "assets/avatar.jpg",
-    "viewsStart": 272
+    "viewsStart": 305
   },
   "discord": {
     "enabled": true,
