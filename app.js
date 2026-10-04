@@ -279,6 +279,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const inputAudioFile = document.getElementById("input-audio-file");
   const audioDropzone = document.getElementById("audio-dropzone");
   const audioDropzoneLabel = document.getElementById("audio-dropzone-label");
+  const inputAudioUrl = document.getElementById("input-audio-url");
   const inputTrackTitle = document.getElementById("input-track-title");
   const inputTrackArtist = document.getElementById("input-track-artist");
   const inputDefaultVolume = document.getElementById("input-default-volume");
@@ -667,7 +668,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function hasAdminPassword() {
-    return !!localStorage.getItem("jonas_admin_hash");
+    return !!(localStorage.getItem("jonas_admin_hash") || activeConfig.adminPasswordHash);
   }
 
   function openAuthOrPanel() {
@@ -736,11 +737,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!hasAdminPassword()) {
       // First time setup
       localStorage.setItem("jonas_admin_hash", enteredHash);
+      activeConfig.adminPasswordHash = enteredHash;
+      localStorage.setItem("jonas_active_config", JSON.stringify(activeConfig));
       sessionStorage.setItem("jonas_admin_session", "true");
       adminAuthModal.classList.add("hidden");
       openAdminPanel();
     } else {
-      const storedHash = localStorage.getItem("jonas_admin_hash");
+      const storedHash = localStorage.getItem("jonas_admin_hash") || activeConfig.adminPasswordHash;
       if (enteredHash === storedHash) {
         sessionStorage.setItem("jonas_admin_session", "true");
         adminAuthModal.classList.add("hidden");
@@ -780,6 +783,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Populate Fields from activeConfig
   function populateAdminFields() {
     inputVideoUrl.value = activeConfig.media.videoSrc || "";
+    if (inputAudioUrl) inputAudioUrl.value = activeConfig.media.audioSrc || "";
     inputTrackTitle.value = activeConfig.media.trackTitle || "";
     inputTrackArtist.value = activeConfig.media.trackArtist || "";
     inputDefaultVolume.value = activeConfig.media.defaultVolume || 0.5;
@@ -984,6 +988,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     activeConfig.discord.enabled = true;
 
     if (inputVideoUrl.value.trim()) activeConfig.media.videoSrc = inputVideoUrl.value.trim();
+    if (inputAudioUrl && inputAudioUrl.value.trim()) activeConfig.media.audioSrc = inputAudioUrl.value.trim();
     activeConfig.media.trackTitle = inputTrackTitle.value.trim();
     activeConfig.media.trackArtist = inputTrackArtist.value.trim();
     activeConfig.media.defaultVolume = parseFloat(inputDefaultVolume.value);
@@ -1020,6 +1025,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!pw) return;
     const h = await hashString(pw);
     localStorage.setItem("jonas_admin_hash", h);
+    activeConfig.adminPasswordHash = h;
+    localStorage.setItem("jonas_active_config", JSON.stringify(activeConfig));
     inputNewPassword.value = "";
     passwordChangeStatus.textContent = "✅ Admin-Passwort erfolgreich aktualisiert!";
     passwordChangeStatus.classList.remove("hidden");

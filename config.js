@@ -6,6 +6,7 @@
  */
 
 const CONFIG = {
+  "adminPasswordHash": "",
   "profile": {
     "name": "Jonas",
     "titleGlow": true,

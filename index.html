@@ -16,7 +16,7 @@
 
   <!-- Fullscreen Background Video & Canvas Fallback -->
   <div class="video-container">
-    <video id="bg-video" loop playsinline preload="auto" poster="assets/reference_preview.png">
+    <video id="bg-video" loop playsinline preload="auto">
       <source src="assets/bg-video.mp4" type="video/mp4">
     </video>
     <canvas id="ambient-canvas"></canvas>
@@ -227,6 +227,11 @@
               <input type="file" id="input-audio-file" accept="audio/mpeg,audio/wav,audio/ogg" class="file-hidden">
               <svg class="dropzone-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
               <span id="audio-dropzone-label">Audio-Datei auswählen (MP3 / WAV)</span>
+            </div>
+
+            <div class="form-row">
+              <label>Oder direkte Musik-URL:</label>
+              <input type="text" id="input-audio-url" class="admin-input" placeholder="assets/bg-audio.mp3 oder https://...">
             </div>
 
             <div class="grid-2">
