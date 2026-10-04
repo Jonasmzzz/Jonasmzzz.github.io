@@ -251,7 +251,7 @@ html, body {
 }
 
 .avatar-wrapper:hover {
-  transform: scale(1.08);
+  transform: scale(1.08) rotate(1.5deg);
 }
 
 /* Background Ambient Glow */
@@ -273,34 +273,22 @@ html, body {
   100% { opacity: 0.85; transform: scale(1.06); filter: blur(16px); }
 }
 
-/* Centered Avatar Image Frame */
-.avatar-img-frame {
+/* Centered Avatar Image */
+.avatar-img {
   grid-area: 1 / 1;
-  width: 96px;
-  height: 96px;
+  width: 94px;
+  height: 94px;
+  object-fit: cover;
   border-radius: 50%;
-  overflow: hidden;
   border: 2.5px solid rgba(255, 255, 255, 0.35);
   box-shadow: 0 0 28px rgba(255, 255, 255, 0.25), 0 14px 35px rgba(0, 0, 0, 0.85);
   z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: block;
   box-sizing: border-box;
   transition: border-color 0.35s ease, box-shadow 0.35s ease;
 }
 
-.avatar-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center center;
-  transform: scale(1.15); /* Eliminates any border leakage */
-  border-radius: 50%;
-  display: block;
-}
-
-.avatar-wrapper:hover .avatar-img-frame {
+.avatar-wrapper:hover .avatar-img {
   border-color: rgba(255, 255, 255, 0.85);
   box-shadow: 0 0 40px rgba(255, 255, 255, 0.55), 0 16px 45px rgba(0, 0, 0, 0.95);
 }
@@ -1463,42 +1451,8 @@ html, body {
   background: rgba(12, 12, 16, 0.5);
 }
 
-/* Responsive adjustments for all screen sizes & mobile devices */
+/* Responsive adjustments */
 @media (max-width: 600px) {
-  .page-wrapper {
-    padding: 20px 16px 36px;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-  .profile-card {
-    width: 100%;
-    max-width: 380px;
-    padding: 38px 20px 36px;
-    margin: 0 auto;
-  }
-  .username {
-    font-size: 1.95rem;
-  }
-  .social-links-grid {
-    gap: 14px;
-  }
-  .social-link-item {
-    width: 40px;
-    height: 40px;
-  }
-  .social-link-item svg {
-    width: 28px;
-    height: 28px;
-  }
-  .media-widget {
-    max-width: 380px;
-    width: 100%;
-    margin: 16px auto 0;
-    padding: 8px 16px;
-  }
   .grid-2 {
     grid-template-columns: 1fr;
   }
