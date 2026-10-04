@@ -1126,10 +1126,44 @@ const CONFIG = ${JSON.stringify(activeConfig, null, 2)};
     }
   });
 
-  // Initialize UI
+  // Initialize UI & Interactive Effects
   applyActiveConfig();
   initAmbientCanvas();
+  initCardInteractiveEffects();
 });
+
+// ----------------------------------------------------
+// 3D CARD PARALLAX TILT & SPECULAR HIGHLIGHT
+// ----------------------------------------------------
+function initCardInteractiveEffects() {
+  const card = document.getElementById("profile-card");
+  if (!card) return;
+
+  let isHovered = false;
+
+  window.addEventListener("mousemove", (e) => {
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    card.style.setProperty("--mouse-x", `${x}px`);
+    card.style.setProperty("--mouse-y", `${y}px`);
+
+    const cardCenterX = rect.left + rect.width / 2;
+    const cardCenterY = rect.top + rect.height / 2;
+    const distX = (e.clientX - cardCenterX) / (window.innerWidth / 2);
+    const distY = (e.clientY - cardCenterY) / (window.innerHeight / 2);
+
+    const tiltX = -distY * 7;
+    const tiltY = distX * 7;
+
+    card.style.transform = `perspective(1000px) rotateX(${tiltX.toFixed(2)}deg) rotateY(${tiltY.toFixed(2)}deg)`;
+  });
+
+  window.addEventListener("mouseleave", () => {
+    card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg)`;
+  });
+}
 
 // ----------------------------------------------------
 // DYNAMIC AMBIENT CANVAS (Stars or Snow)
