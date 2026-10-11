@@ -211,6 +211,11 @@ if (localConfigStr) {
   try {
     const parsed = JSON.parse(localConfigStr);
     activeConfig = Object.assign(activeConfig, parsed);
+    // WICHTIG: adminPasswordHash aus CONFIG hat immer Vorrang!
+    // Lokaler localStorage darf den Master-Hash niemals überschreiben.
+    if (CONFIG.adminPasswordHash) {
+      activeConfig.adminPasswordHash = CONFIG.adminPasswordHash;
+    }
   } catch (e) {
     console.error("Config parse error:", e);
   }
@@ -951,7 +956,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function hasAdminPassword() {
-    return !!(localStorage.getItem("jonas_admin_hash") || activeConfig.adminPasswordHash);
+    // CONFIG.adminPasswordHash ist der globale Master-Hash (in config.js gespeichert).
+    // Er gilt für alle Clients weltweit. localStorage ist nur ein veralteter Fallback.
+    return !!(CONFIG.adminPasswordHash || activeConfig.adminPasswordHash || localStorage.getItem("jonas_admin_hash"));
   }
 
   function openAuthOrPanel() {
@@ -1018,15 +1025,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     const enteredHash = await hashString(entered);
 
     if (!hasAdminPassword()) {
-      // First time setup
-      localStorage.setItem("jonas_admin_hash", enteredHash);
+      // Erstmalige Passwort-Einrichtung (nur wenn CONFIG.adminPasswordHash leer ist)
       activeConfig.adminPasswordHash = enteredHash;
       localStorage.setItem("jonas_active_config", JSON.stringify(activeConfig));
       sessionStorage.setItem("jonas_admin_session", "true");
       adminAuthModal.classList.add("hidden");
       openAdminPanel();
     } else {
-      const storedHash = localStorage.getItem("jonas_admin_hash") || activeConfig.adminPasswordHash;
+      // Vergleich: CONFIG.adminPasswordHash hat immer Vorrang (globaler Master-Hash)
+      const storedHash = CONFIG.adminPasswordHash || activeConfig.adminPasswordHash || localStorage.getItem("jonas_admin_hash");
       if (enteredHash === storedHash) {
         sessionStorage.setItem("jonas_admin_session", "true");
         adminAuthModal.classList.add("hidden");
