@@ -6,14 +6,14 @@
  */
 
 const CONFIG = {
-  "adminPasswordHash": "",
+  "adminPasswordHash": "4ec24a2d7f1dfae1f98882eabf0400cd9483dd2de78b926b625c46e8787f3816",
   "profile": {
     "name": "Jonas",
     "titleGlow": true,
     "location": "FFM",
     "badge": "DEV",
     "avatar": "assets/avatar.jpg",
-    "viewsStart": 433
+    "viewsStart": 438
   },
   "discord": {
     "enabled": true,
