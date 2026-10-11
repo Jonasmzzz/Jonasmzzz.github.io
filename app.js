@@ -498,14 +498,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       profileAvatar.src = activeConfig.profile.avatar || "assets/avatar.jpg";
     }
 
-    // View Counter
-    let views = parseInt(localStorage.getItem("jonas_profile_views") || activeConfig.profile.viewsStart || 119, 10);
-    if (!sessionStorage.getItem("jonas_viewed")) {
-      views += 1;
-      localStorage.setItem("jonas_profile_views", views);
-      sessionStorage.setItem("jonas_viewed", "true");
+    // View Counter (Sofortige Cache-Anzeige)
+    const cachedViews = parseInt(localStorage.getItem("jonas_profile_views") || activeConfig.profile.viewsStart || 305, 10);
+    if (viewCountEl && !viewCountEl.getAttribute("data-raw-views")) {
+      viewCountEl.textContent = cachedViews.toLocaleString("de-DE");
+      viewCountEl.setAttribute("data-raw-views", cachedViews);
     }
-    viewCountEl.textContent = views;
 
     // Track Meta
     trackName.textContent = activeConfig.media.trackTitle || "Ambient Vibes";
@@ -592,6 +590,135 @@ document.addEventListener("DOMContentLoaded", async () => {
         socialLinksContainer.appendChild(a);
       });
     }
+  }
+
+  // --------------------------------------------------
+  // 1b. GLOBAL REALTIME VIEW COUNTER (CountAPI Integration)
+  // --------------------------------------------------
+  const COUNTER_API_BASE = "https://countapi.mileshilliard.com/api/v1";
+  const getCounterKey = () => (activeConfig.profile && activeConfig.profile.counterKey) || "jonasmzzz_github_io_views";
+  let pollViewsTimer = null;
+
+  function updateViewCountDisplay(newVal) {
+    if (!viewCountEl || typeof newVal !== "number" || isNaN(newVal)) return;
+
+    const currentRaw = viewCountEl.getAttribute("data-raw-views");
+    const currentVal = currentRaw ? parseInt(currentRaw, 10) : parseInt(viewCountEl.textContent.replace(/\D/g, ""), 10);
+    viewCountEl.setAttribute("data-raw-views", newVal);
+
+    if (!isNaN(currentVal) && newVal > currentVal) {
+      // Glow Bump Animation
+      const counterContainer = viewCountEl.closest(".view-counter");
+      if (counterContainer) {
+        counterContainer.classList.remove("updated");
+        void counterContainer.offsetWidth; // Reflow erzwingen
+        counterContainer.classList.add("updated");
+      }
+
+      // Weicher Hochzähl-Effekt bei kleinen Schritten
+      const diff = newVal - currentVal;
+      if (diff <= 30) {
+        const startTime = performance.now();
+        const duration = 500;
+        function step(now) {
+          const elapsed = now - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          const current = Math.round(currentVal + diff * progress);
+          viewCountEl.textContent = current.toLocaleString("de-DE");
+          if (progress < 1) {
+            requestAnimationFrame(step);
+          } else {
+            viewCountEl.textContent = newVal.toLocaleString("de-DE");
+          }
+        }
+        requestAnimationFrame(step);
+        return;
+      }
+    }
+
+    viewCountEl.textContent = newVal.toLocaleString("de-DE");
+  }
+
+  async function syncGlobalViews(newVal) {
+    const key = getCounterKey();
+    try {
+      const res = await fetch(`${COUNTER_API_BASE}/set/${key}?value=${newVal}`);
+      if (res.ok) {
+        console.log(`[ViewCounter] Globaler Zähler auf ${newVal} synchronisiert.`);
+      }
+    } catch (err) {
+      console.warn("[ViewCounter] Konnte globalen Zähler nicht synchronisieren:", err);
+    }
+  }
+
+  async function fetchCurrentGlobalViews() {
+    const key = getCounterKey();
+    try {
+      const res = await fetch(`${COUNTER_API_BASE}/get/${key}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && typeof data.value === "number") {
+          updateViewCountDisplay(data.value);
+          localStorage.setItem("jonas_profile_views", data.value);
+          return data.value;
+        }
+      }
+    } catch (err) {
+      // Silent catch
+    }
+    return null;
+  }
+
+  async function recordGlobalPageView() {
+    const key = getCounterKey();
+    try {
+      const res = await fetch(`${COUNTER_API_BASE}/hit/${key}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && typeof data.value === "number") {
+          updateViewCountDisplay(data.value);
+          localStorage.setItem("jonas_profile_views", data.value);
+          return;
+        }
+      }
+      // Falls Key noch nicht existiert (404/Error), initialisieren und erneut versuchen
+      const initialStart = activeConfig.profile.viewsStart || 305;
+      await syncGlobalViews(initialStart);
+      const retryRes = await fetch(`${COUNTER_API_BASE}/hit/${key}`);
+      if (retryRes.ok) {
+        const data = await retryRes.json();
+        if (data && typeof data.value === "number") {
+          updateViewCountDisplay(data.value);
+          localStorage.setItem("jonas_profile_views", data.value);
+        }
+      }
+    } catch (err) {
+      console.warn("[ViewCounter] Offline / API nicht erreichbar, nutze Fallback:", err);
+    }
+  }
+
+  function initGlobalViewCounter() {
+    // 1. Initialer Cache-Wert sofort anzeigen
+    const initialCached = parseInt(localStorage.getItem("jonas_profile_views") || activeConfig.profile.viewsStart || 305, 10);
+    updateViewCountDisplay(initialCached);
+
+    // 2. Globalen View zählen (nach jedem View hochzählen für alle Nutzer weltweit)
+    recordGlobalPageView();
+
+    // 3. Live Auto-Aktualisierung (prüft alle 10 Sekunden, ob andere Nutzer das Profil aufgerufen haben)
+    if (pollViewsTimer) clearInterval(pollViewsTimer);
+    pollViewsTimer = setInterval(() => {
+      if (!document.hidden) {
+        fetchCurrentGlobalViews();
+      }
+    }, 10000);
+
+    // Bei Tab-Rückkehr sofort prüfen
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) {
+        fetchCurrentGlobalViews();
+      }
+    });
   }
 
   // --------------------------------------------------
@@ -791,8 +918,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     inputAvatarUrl.value = activeConfig.profile.avatar || "";
     inputProfileName.value = activeConfig.profile.name || "";
-    inputProfileLocation.value = activeConfig.profile.location || "";
-    inputProfileViews.value = localStorage.getItem("jonas_profile_views") || activeConfig.profile.viewsStart || 119;
+    inputProfileViews.value = localStorage.getItem("jonas_profile_views") || activeConfig.profile.viewsStart || 305;
+    fetchCurrentGlobalViews().then(val => {
+      if (val !== null && inputProfileViews) {
+        inputProfileViews.value = val;
+      }
+    });
 
     if (inputDiscordId) {
       inputDiscordId.value = (activeConfig.discord && activeConfig.discord.userId) || "453756683886264321";
@@ -979,6 +1110,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!isNaN(views)) {
       activeConfig.profile.viewsStart = views;
       localStorage.setItem("jonas_profile_views", views);
+      updateViewCountDisplay(views);
+      syncGlobalViews(views);
     }
 
     if (!activeConfig.discord) activeConfig.discord = {};
@@ -1014,6 +1147,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       localStorage.removeItem("jonas_active_config");
       activeConfig = JSON.parse(JSON.stringify(CONFIG));
       applyActiveConfig();
+      initGlobalViewCounter();
       populateAdminFields();
       alert("Einstellungen zurückgesetzt!");
     }
@@ -1128,6 +1262,7 @@ const CONFIG = ${JSON.stringify(activeConfig, null, 2)};
 
   // Initialize UI & Interactive Effects
   applyActiveConfig();
+  initGlobalViewCounter();
   initAmbientCanvas();
   initCardInteractiveEffects();
 });
