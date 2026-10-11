@@ -13,7 +13,7 @@ const CONFIG = {
     "location": "FFM",
     "badge": "DEV",
     "avatar": "assets/avatar.jpg",
-    "viewsStart": 425
+    "viewsStart": 433
   },
   "discord": {
     "enabled": true,
@@ -68,11 +68,11 @@ const CONFIG = {
     }
   ],
   "effects": {
-    "splashText": "click to enter",
+    "splashText": "[ click to enter ]",
     "glowColor": "#ffffff",
     "audioVisualizer": true,
-    "ambientMode": "stars",
-    "glassBlur": 24,
+    "ambientMode": "none",
+    "glassBlur": 30,
     "customCursor": false,
     "cursorSpotlight": true,
     "clickSparkles": true,
