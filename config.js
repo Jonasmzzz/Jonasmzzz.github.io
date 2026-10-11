@@ -6,22 +6,21 @@
  */
 
 const CONFIG = {
-  "adminPasswordHash": "4ec24a2d7f1dfae1f98882eabf0400cd9483dd2de78b926b625c46e8787f3816",
+  "adminPasswordHash": "",
   "profile": {
     "name": "Jonas",
     "titleGlow": true,
     "location": "FFM",
-    "badge": "VIP",
+    "badge": "leck",
     "avatar": "assets/avatar.jpg",
-    "viewsStart": 305,
-    "counterKey": "jonasmzzz_github_io_views"
+    "viewsStart": 408
   },
   "discord": {
-    "enabled": false,
+    "enabled": true,
     "userId": "453756683886264321",
-    "useDiscordAvatar": false,
-    "showStatusRing": false,
-    "showPresenceCard": false
+    "useDiscordAvatar": true,
+    "showStatusRing": true,
+    "showPresenceCard": true
   },
   "media": {
     "videoSrc": "assets/bg-video.mp4",
