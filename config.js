@@ -11,9 +11,9 @@ const CONFIG = {
     "name": "Jonas",
     "titleGlow": true,
     "location": "FFM",
-    "badge": "leck",
+    "badge": "DEV",
     "avatar": "assets/avatar.jpg",
-    "viewsStart": 408
+    "viewsStart": 425
   },
   "discord": {
     "enabled": true,
@@ -73,7 +73,7 @@ const CONFIG = {
     "audioVisualizer": true,
     "ambientMode": "stars",
     "glassBlur": 24,
-    "customCursor": true,
+    "customCursor": false,
     "cursorSpotlight": true,
     "clickSparkles": true,
     "enableSfx": true
