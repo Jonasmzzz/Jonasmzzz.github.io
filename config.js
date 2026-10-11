@@ -13,7 +13,7 @@ const CONFIG = {
     "location": "FFM",
     "badge": "DEV",
     "avatar": "assets/avatar.jpg",
-    "viewsStart": 438
+    "viewsStart": 444
   },
   "discord": {
     "enabled": true,
@@ -32,15 +32,15 @@ const CONFIG = {
   "links": [
     {
       "name": "Spotify",
-      "url": "https://open.spotify.com",
+      "url": "https://open.spotify.com/user/1sz8fg9nzw3mahlqm599rc1wp?si=9de92f31b8ec483f",
       "icon": "spotify",
-      "description": "Playlists & Sound"
+      "description": "Spotify"
     },
     {
       "name": "Instagram",
-      "url": "https://instagram.com",
+      "url": "https://www.instagram.com/jonas.mzz/",
       "icon": "instagram",
-      "description": "@jonas"
+      "description": "@Jonas"
     },
     {
       "name": "Snapchat",
@@ -53,18 +53,6 @@ const CONFIG = {
       "url": "https://github.com/Jonasmzzz",
       "icon": "github",
       "description": "github.com/Jonasmzzz"
-    },
-    {
-      "name": "Discord",
-      "url": "https://discord.com",
-      "icon": "discord",
-      "description": "Discord Community"
-    },
-    {
-      "name": "TikTok",
-      "url": "https://tiktok.com",
-      "icon": "tiktok",
-      "description": "TikTok Feed"
     }
   ],
   "effects": {
