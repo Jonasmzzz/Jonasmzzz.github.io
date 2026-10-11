@@ -216,6 +216,136 @@ if (localConfigStr) {
   }
 }
 
+// Theme Presets Configuration
+const THEMES = {
+  cyberpunk: {
+    name: "Cyberpunk Neon",
+    glowColor: "#a855f7",
+    ambientMode: "matrix",
+    glassBlur: 24,
+    badge: "VIP",
+    splashText: "[ enter the matrix ]"
+  },
+  crimson: {
+    name: "Blood Crimson",
+    glowColor: "#ff0033",
+    ambientMode: "embers",
+    glassBlur: 20,
+    badge: "IMMORTAL",
+    splashText: "[ enter bloodline ]"
+  },
+  ice: {
+    name: "Ice Glacier",
+    glowColor: "#00f0ff",
+    ambientMode: "snow",
+    glassBlur: 26,
+    badge: "COLD",
+    splashText: "[ enter the frost ]"
+  },
+  gold: {
+    name: "Luxury Gold",
+    glowColor: "#ffd700",
+    ambientMode: "stars",
+    glassBlur: 22,
+    badge: "ROYAL",
+    splashText: "[ welcome to luxury ]"
+  },
+  stealth: {
+    name: "Monochrome Stealth",
+    glowColor: "#ffffff",
+    ambientMode: "rain",
+    glassBlur: 24,
+    badge: "VERIFIED",
+    splashText: "[ click anywhere to enter ]"
+  }
+};
+
+// Web Audio API Synthesizer (Instant crisp UI sounds, zero dependencies)
+let audioCtx = null;
+function getAudioContext() {
+  if (!audioCtx) {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (AudioContextClass) audioCtx = new AudioContextClass();
+  }
+  if (audioCtx && audioCtx.state === "suspended") {
+    audioCtx.resume().catch(() => {});
+  }
+  return audioCtx;
+}
+
+function playSfx(type = "click") {
+  if (activeConfig.effects?.enableSfx === false) return;
+  try {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    const now = ctx.currentTime;
+
+    if (type === "hover") {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(440, now);
+      osc.frequency.exponentialRampToValueAtTime(600, now + 0.04);
+      gain.gain.setValueAtTime(0.025, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+      osc.start(now);
+      osc.stop(now + 0.04);
+    } else if (type === "click") {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(800, now);
+      osc.frequency.exponentialRampToValueAtTime(320, now + 0.07);
+      gain.gain.setValueAtTime(0.06, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
+      osc.start(now);
+      osc.stop(now + 0.07);
+    } else if (type === "success") {
+      [523.25, 659.25, 783.99].forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, now + i * 0.05);
+        gain.gain.setValueAtTime(0.04, now + i * 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.05 + 0.25);
+        osc.start(now + i * 0.05);
+        osc.stop(now + i * 0.05 + 0.25);
+      });
+    } else if (type === "enter") {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(160, now);
+      osc.frequency.exponentialRampToValueAtTime(55, now + 0.35);
+      gain.gain.setValueAtTime(0.12, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+      osc.start(now);
+      osc.stop(now + 0.35);
+    }
+  } catch (e) {}
+}
+
+let toastTimer = null;
+function showToast(message, type = "info") {
+  const toastEl = document.getElementById("admin-toast");
+  if (!toastEl) return;
+  toastEl.textContent = message;
+  toastEl.classList.remove("hidden");
+  playSfx("success");
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    toastEl.classList.add("hidden");
+  }, 3200);
+}
+
 // Global Ambient Controller
 let ambientMode = (activeConfig.effects && activeConfig.effects.ambientMode) || "stars";
 
@@ -313,6 +443,19 @@ document.addEventListener("DOMContentLoaded", async () => {
   const inputNewPassword = document.getElementById("input-new-password");
   const btnSaveNewPassword = document.getElementById("btn-save-new-password");
   const passwordChangeStatus = document.getElementById("password-change-status");
+
+  // New Extended Controls
+  const profileBadge = document.getElementById("profile-badge");
+  const inputProfileBadge = document.getElementById("input-profile-badge");
+  const checkCustomCursor = document.getElementById("check-custom-cursor");
+  const checkCursorSpotlight = document.getElementById("check-cursor-spotlight");
+  const checkClickSparkles = document.getElementById("check-click-sparkles");
+  const checkEnableSfx = document.getElementById("check-enable-sfx");
+  const btnTestSfx = document.getElementById("btn-test-sfx");
+  const btnTestView = document.getElementById("btn-test-view");
+  const btnPreviewAudio = document.getElementById("btn-preview-audio");
+  const adminCurrentSectionTitle = document.getElementById("admin-current-section-title");
+  const adminCurrentSectionDesc = document.getElementById("admin-current-section-desc");
 
   // Runtime State
   let isPlaying = false;
@@ -545,7 +688,19 @@ document.addEventListener("DOMContentLoaded", async () => {
       splashPrompt.textContent = activeConfig.effects.splashText;
     }
 
+    // Profile Badge
+    if (profileBadge) {
+      profileBadge.textContent = activeConfig.profile.badge || "VIP";
+    }
+
     ambientMode = activeConfig.effects.ambientMode || "stars";
+
+    // Custom Cursor & Spotlight
+    document.body.classList.toggle("has-custom-cursor", activeConfig.effects?.customCursor !== false);
+    const spotlightEl = document.getElementById("cursor-spotlight");
+    if (spotlightEl) {
+      spotlightEl.style.display = activeConfig.effects?.cursorSpotlight !== false ? "block" : "none";
+    }
 
     // Render Social Links
     renderSocialLinks();
@@ -727,6 +882,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   function enterExperience() {
     if (hasEntered) return;
     hasEntered = true;
+    playSfx("enter");
     splashOverlay.classList.add("fade-out");
     setTimeout(() => profileCard.classList.add("visible"), 200);
     playMedia();
@@ -893,17 +1049,33 @@ document.addEventListener("DOMContentLoaded", async () => {
     adminPanelModal.classList.add("hidden");
   });
 
-  // Tabs Switcher
+  // Tabs Switcher & Section Titles
   const tabButtons = document.querySelectorAll(".panel-tab-btn");
   const tabPanes = document.querySelectorAll(".tab-pane");
+  const TAB_INFOS = {
+    "tab-presets": { title: "Theme Presets", desc: "Passe das Design deiner Profilseite mit 1 Klick an." },
+    "tab-profile": { title: "Profil & Badge", desc: "Passe deinen Namen, dein Abzeichen und den weltweiten Aufrufzähler an." },
+    "tab-media": { title: "Medien & Sound", desc: "Konfiguriere Hintergrundvideo, Musik und Lautstärke." },
+    "tab-links": { title: "Social Links", desc: "Verwalte deine Social Media Icons mit Schnell-Hinzufügen." },
+    "tab-effects": { title: "Effekte & Design", desc: "Passe Glow-Farbe, Matrix/Regen/Glut Partikel und Unschärfe an." },
+    "tab-interact": { title: "Cursor & Sound", desc: "Aktiviere den Guns.lol Crosshair-Cursor, Spotlight & Soundeffekte." },
+    "tab-discord": { title: "Discord Lanyard", desc: "Echtzeit-Discord-Präsenz, Avatar und Spiele-Status." },
+    "tab-publish": { title: "GitHub & Cloud", desc: "Veröffentliche alle Änderungen weltweit auf GitHub Pages." }
+  };
 
   tabButtons.forEach(btn => {
     btn.addEventListener("click", () => {
       tabButtons.forEach(b => b.classList.remove("active"));
       tabPanes.forEach(p => p.classList.remove("active"));
       btn.classList.add("active");
-      const targetPane = document.getElementById(btn.getAttribute("data-tab"));
+      const tabId = btn.getAttribute("data-tab");
+      const targetPane = document.getElementById(tabId);
       if (targetPane) targetPane.classList.add("active");
+      if (TAB_INFOS[tabId] && adminCurrentSectionTitle && adminCurrentSectionDesc) {
+        adminCurrentSectionTitle.textContent = TAB_INFOS[tabId].title;
+        adminCurrentSectionDesc.textContent = TAB_INFOS[tabId].desc;
+      }
+      playSfx("click");
     });
   });
 
@@ -918,6 +1090,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     inputAvatarUrl.value = activeConfig.profile.avatar || "";
     inputProfileName.value = activeConfig.profile.name || "";
+    inputProfileLocation.value = activeConfig.profile.location || "";
+    if (inputProfileBadge) inputProfileBadge.value = activeConfig.profile.badge || "VIP";
+
     inputProfileViews.value = localStorage.getItem("jonas_profile_views") || activeConfig.profile.viewsStart || 305;
     fetchCurrentGlobalViews().then(val => {
       if (val !== null && inputProfileViews) {
@@ -941,6 +1116,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     selectAmbientParticles.value = activeConfig.effects.ambientMode || "stars";
     inputGlassBlur.value = activeConfig.effects.glassBlur || 24;
     selectEqualizerToggle.value = activeConfig.effects.audioVisualizer !== false ? "true" : "false";
+
+    if (checkCustomCursor) checkCustomCursor.checked = activeConfig.effects?.customCursor !== false;
+    if (checkCursorSpotlight) checkCursorSpotlight.checked = activeConfig.effects?.cursorSpotlight !== false;
+    if (checkClickSparkles) checkClickSparkles.checked = activeConfig.effects?.clickSparkles !== false;
+    if (checkEnableSfx) checkEnableSfx.checked = activeConfig.effects?.enableSfx !== false;
 
     inputGithubToken.value = localStorage.getItem("jonas_gh_token") || "";
 
@@ -1131,14 +1311,159 @@ document.addEventListener("DOMContentLoaded", async () => {
     activeConfig.effects.ambientMode = selectAmbientParticles.value;
     activeConfig.effects.glassBlur = parseInt(inputGlassBlur.value, 10);
     activeConfig.effects.audioVisualizer = selectEqualizerToggle.value === "true";
+    if (inputProfileBadge) activeConfig.profile.badge = inputProfileBadge.value.trim() || "VIP";
+    if (checkCustomCursor) activeConfig.effects.customCursor = checkCustomCursor.checked;
+    if (checkCursorSpotlight) activeConfig.effects.cursorSpotlight = checkCursorSpotlight.checked;
+    if (checkClickSparkles) activeConfig.effects.clickSparkles = checkClickSparkles.checked;
+    if (checkEnableSfx) activeConfig.effects.enableSfx = checkEnableSfx.checked;
 
     localStorage.setItem("jonas_active_config", JSON.stringify(activeConfig));
     applyActiveConfig();
+    showToast("💾 Einstellungen erfolgreich gespeichert!", "success");
   }
 
   btnSavePanel.addEventListener("click", () => {
     saveCurrentAdminInputs();
     adminPanelModal.classList.add("hidden");
+  });
+
+  // Theme Presets Click Listener
+  document.querySelectorAll(".preset-card[data-preset]").forEach(card => {
+    card.addEventListener("click", () => {
+      const presetKey = card.getAttribute("data-preset");
+      const p = THEMES[presetKey];
+      if (!p) return;
+
+      document.querySelectorAll(".preset-card").forEach(c => c.classList.remove("active-preset"));
+      card.classList.add("active-preset");
+
+      inputGlowColor.value = p.glowColor;
+      glowColorPreview.textContent = p.glowColor;
+      selectAmbientParticles.value = p.ambientMode;
+      inputGlassBlur.value = p.glassBlur;
+      if (inputProfileBadge) inputProfileBadge.value = p.badge;
+      inputSplashText.value = p.splashText;
+
+      document.documentElement.style.setProperty("--accent-glow", p.glowColor);
+      document.documentElement.style.setProperty("--glass-blur", `${p.glassBlur}px`);
+      ambientMode = p.ambientMode;
+      splashPrompt.textContent = p.splashText;
+      if (profileBadge) profileBadge.textContent = p.badge;
+
+      showToast(`🎨 Preset "${p.name}" angewendet!`, "success");
+    });
+  });
+
+  // Color Swatches Click Listener
+  document.querySelectorAll(".color-swatch-circle[data-swatch]").forEach(swatch => {
+    swatch.addEventListener("click", () => {
+      const col = swatch.getAttribute("data-swatch");
+      inputGlowColor.value = col;
+      glowColorPreview.textContent = col;
+      document.documentElement.style.setProperty("--accent-glow", col);
+      playSfx("click");
+      showToast(`🎨 Akzentfarbe auf ${col} geändert!`, "info");
+    });
+  });
+
+  // Quick Add Social Link Chips
+  document.querySelectorAll(".chip-btn[data-add-platform]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const platform = btn.getAttribute("data-add-platform");
+      const platformNames = {
+        spotify: "Spotify",
+        instagram: "Instagram",
+        snapchat: "Snapchat",
+        github: "GitHub",
+        discord: "Discord",
+        tiktok: "TikTok",
+        youtube: "YouTube",
+        twitch: "Twitch",
+        steam: "Steam",
+        telegram: "Telegram",
+        twitter: "Twitter / X"
+      };
+      const platformUrls = {
+        spotify: "https://open.spotify.com",
+        instagram: "https://instagram.com",
+        snapchat: "https://snapchat.com",
+        github: "https://github.com",
+        discord: "https://discord.gg",
+        tiktok: "https://tiktok.com",
+        youtube: "https://youtube.com",
+        twitch: "https://twitch.tv",
+        steam: "https://steamcommunity.com",
+        telegram: "https://t.me",
+        twitter: "https://x.com"
+      };
+
+      if (!activeConfig.links) activeConfig.links = [];
+      activeConfig.links.push({
+        name: platformNames[platform] || platform,
+        url: platformUrls[platform] || "https://",
+        icon: platform,
+        description: `@${(activeConfig.profile.name || "jonas").toLowerCase()}`
+      });
+      populateAdminLinksList();
+      showToast(`🔗 ${platformNames[platform] || platform} hinzugefügt!`, "info");
+    });
+  });
+
+  // Audio Preview Test Button in Media Tab
+  if (btnPreviewAudio) {
+    let previewPlaying = false;
+    btnPreviewAudio.addEventListener("click", () => {
+      const audioUrl = inputAudioUrl.value.trim() || activeConfig.media.audioSrc || "assets/bg-audio.mp3";
+      if (!previewPlaying) {
+        bgAudio.src = audioUrl;
+        bgAudio.play().then(() => {
+          previewPlaying = true;
+          btnPreviewAudio.innerHTML = `<span>⏸️ Song stoppen</span>`;
+          btnPreviewAudio.classList.add("btn-accent-sm");
+        }).catch(err => {
+          alert("Konnte Audio nicht abspielen: " + err.message);
+        });
+      } else {
+        bgAudio.pause();
+        previewPlaying = false;
+        btnPreviewAudio.innerHTML = `<span>▶️ Song im Dashboard testen</span>`;
+        btnPreviewAudio.classList.remove("btn-accent-sm");
+      }
+    });
+  }
+
+  // SFX Test Button
+  if (btnTestSfx) {
+    btnTestSfx.addEventListener("click", () => {
+      playSfx("click");
+      setTimeout(() => playSfx("success"), 140);
+      showToast("🔊 Soundeffekt abgespielt!", "info");
+    });
+  }
+
+  // Test Global View Button
+  if (btnTestView) {
+    btnTestView.addEventListener("click", async () => {
+      btnTestView.disabled = true;
+      btnTestView.textContent = "⏳ Lädt...";
+      await recordGlobalPageView();
+      btnTestView.disabled = false;
+      btnTestView.textContent = "+1 Test";
+      showToast("📈 +1 Globaler Aufruf simuliert!", "success");
+    });
+  }
+
+  // Global Keyboard Shortcuts (Esc = close, Ctrl+S = save)
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !adminPanelModal.classList.contains("hidden")) {
+      adminPanelModal.classList.add("hidden");
+    }
+    if ((e.ctrlKey || e.metaKey) && (e.key === "s" || e.key === "S")) {
+      if (!adminPanelModal.classList.contains("hidden")) {
+        e.preventDefault();
+        saveCurrentAdminInputs();
+      }
+    }
   });
 
   // Reset Defaults
@@ -1265,6 +1590,7 @@ const CONFIG = ${JSON.stringify(activeConfig, null, 2)};
   initGlobalViewCounter();
   initAmbientCanvas();
   initCardInteractiveEffects();
+  initCustomCursor();
 });
 
 // ----------------------------------------------------
@@ -1311,7 +1637,9 @@ function initCardInteractiveEffects() {
 
   // Interactive Click Sparkle Particle Burst
   window.addEventListener("click", (e) => {
-    spawnClickSparkles(e.clientX, e.clientY);
+    if (activeConfig.effects?.clickSparkles !== false) {
+      spawnClickSparkles(e.clientX, e.clientY);
+    }
   });
 }
 
@@ -1335,7 +1663,7 @@ function spawnClickSparkles(x, y) {
 }
 
 // ----------------------------------------------------
-// DYNAMIC AMBIENT CANVAS (Constellation Stars & Sparkles)
+// DYNAMIC AMBIENT CANVAS (Multi-Mode Particle Engine)
 // ----------------------------------------------------
 function initAmbientCanvas() {
   const canvas = document.getElementById("ambient-canvas");
@@ -1348,95 +1676,322 @@ function initAmbientCanvas() {
   window.addEventListener("resize", () => {
     width = canvas.width = window.innerWidth;
     height = canvas.height = window.innerHeight;
+    initParticles();
   });
 
-  const numParticles = 80;
+  // ---- Stars / Snow particles ----
   const particles = [];
+  function initParticles() {
+    particles.length = 0;
+    const count = width < 600 ? 50 : 90;
+    for (let i = 0; i < count; i++) {
+      particles.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        radius: Math.random() * 1.8 + 0.5,
+        speedX: (Math.random() - 0.5) * 0.4,
+        speedY: (Math.random() - 0.5) * 0.4,
+        alpha: Math.random() * 0.75 + 0.2,
+        pulseSpeed: Math.random() * 0.025 + 0.008,
+      });
+    }
+  }
+  initParticles();
 
-  for (let i = 0; i < numParticles; i++) {
-    particles.push({
+  // ---- Matrix columns ----
+  const MATRIX_CHARS = "アイウエオカキクケコサシスセソタチツテトナニヌネノ0123456789ABCDEF";
+  let matrixCols = [];
+  function initMatrix() {
+    const colWidth = 16;
+    const numCols = Math.floor(width / colWidth);
+    matrixCols = [];
+    for (let i = 0; i < numCols; i++) {
+      matrixCols.push({
+        x: i * colWidth + colWidth / 2,
+        y: Math.random() * -height,
+        speed: Math.random() * 1.5 + 0.6,
+        length: Math.floor(Math.random() * 18 + 8),
+        chars: Array.from({ length: 28 }, () => MATRIX_CHARS[Math.floor(Math.random() * MATRIX_CHARS.length)]),
+        charTimer: 0,
+      });
+    }
+  }
+  initMatrix();
+
+  // ---- Rain streaks ----
+  let rainDrops = [];
+  function initRain() {
+    rainDrops = [];
+    const count = Math.floor(width / 12);
+    for (let i = 0; i < count; i++) {
+      rainDrops.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        length: Math.random() * 18 + 8,
+        speed: Math.random() * 5 + 4,
+        alpha: Math.random() * 0.35 + 0.1,
+      });
+    }
+  }
+  initRain();
+
+  // ---- Embers ----
+  let embers = [];
+  function initEmbers() {
+    embers = [];
+    const count = 70;
+    for (let i = 0; i < count; i++) {
+      embers.push(spawnEmber());
+    }
+  }
+  function spawnEmber() {
+    return {
       x: Math.random() * width,
-      y: Math.random() * height,
-      radius: Math.random() * 1.8 + 0.6,
-      speedX: (Math.random() - 0.5) * 0.35,
-      speedY: (Math.random() - 0.5) * 0.35,
-      alpha: Math.random() * 0.8 + 0.2,
-      pulseSpeed: Math.random() * 0.025 + 0.008,
-    });
+      y: height + Math.random() * 40,
+      vx: (Math.random() - 0.5) * 0.8,
+      vy: -(Math.random() * 1.5 + 0.5),
+      radius: Math.random() * 2.2 + 0.5,
+      alpha: Math.random() * 0.7 + 0.3,
+      life: 1,
+      decay: Math.random() * 0.004 + 0.002,
+    };
+  }
+  initEmbers();
+
+  // ---- Accent color helper ----
+  function getAccentColor() {
+    return getComputedStyle(document.documentElement).getPropertyValue("--accent-glow").trim() || "#ffffff";
+  }
+
+  function hexToRgb(hex) {
+    const clean = hex.replace("#", "");
+    const r = parseInt(clean.substring(0, 2), 16);
+    const g = parseInt(clean.substring(2, 4), 16);
+    const b = parseInt(clean.substring(4, 6), 16);
+    return `${r},${g},${b}`;
   }
 
   function render() {
     ctx.clearRect(0, 0, width, height);
+    const mode = ambientMode;
 
-    if (ambientMode === "none") {
+    if (mode === "none") {
+      // Only sparkles
+      drawSparkles();
       requestAnimationFrame(render);
       return;
     }
 
-    // 1. Draw Star Particles & Constellations
-    for (let i = 0; i < particles.length; i++) {
-      const p = particles[i];
+    const accent = getAccentColor();
+    const rgb = hexToRgb(accent);
 
-      if (ambientMode === "snow") {
-        p.y += Math.abs(p.speedY) + 0.5;
-        p.x += Math.sin(Date.now() * 0.001 + i) * 0.3;
-      } else {
-        p.x += p.speedX;
-        p.y += p.speedY;
-      }
+    // =========================================
+    // MODE: MATRIX
+    // =========================================
+    if (mode === "matrix") {
+      matrixCols.forEach(col => {
+        col.charTimer++;
+        if (col.charTimer % 6 === 0) {
+          // Randomize one character in the trail
+          const idx = Math.floor(Math.random() * col.chars.length);
+          col.chars[idx] = MATRIX_CHARS[Math.floor(Math.random() * MATRIX_CHARS.length)];
+        }
 
-      if (p.x < 0) p.x = width;
-      if (p.x > width) p.x = 0;
-      if (p.y < 0) p.y = height;
-      if (p.y > height) p.y = 0;
+        const charHeight = 16;
+        for (let j = 0; j < col.length; j++) {
+          const cy = col.y - j * charHeight;
+          if (cy < 0 || cy > height) continue;
+          const ratio = 1 - j / col.length;
+          const a = j === 0 ? 1 : ratio * 0.6;
+          // Head is bright accent, trail fades green
+          if (j === 0) {
+            ctx.fillStyle = `rgba(255,255,255,${a})`;
+          } else {
+            ctx.fillStyle = `rgba(${rgb},${a})`;
+          }
+          ctx.font = `${charHeight - 2}px monospace`;
+          ctx.fillText(col.chars[j % col.chars.length], col.x - 5, cy);
+        }
 
-      p.alpha += Math.sin(Date.now() * p.pulseSpeed) * 0.006;
-      const displayAlpha = Math.max(0.15, Math.min(0.95, p.alpha));
-
-      // Draw connections when near mouse cursor
-      const dxMouse = globalMouse.x - p.x;
-      const dyMouse = globalMouse.y - p.y;
-      const distMouse = Math.sqrt(dxMouse * dxMouse + dyMouse * dyMouse);
-      if (distMouse < 130) {
-        ctx.beginPath();
-        ctx.moveTo(p.x, p.y);
-        ctx.lineTo(globalMouse.x, globalMouse.y);
-        ctx.strokeStyle = `rgba(255, 255, 255, ${0.18 * (1 - distMouse / 130)})`;
-        ctx.lineWidth = 0.8;
-        ctx.stroke();
-      }
-
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(255, 255, 255, ${displayAlpha})`;
-      ctx.shadowBlur = ambientMode === "stars" ? 10 : 3;
-      ctx.shadowColor = "rgba(255, 255, 255, 0.9)";
-      ctx.fill();
+        col.y += col.speed;
+        if (col.y - col.length * 16 > height) {
+          col.y = -Math.random() * height * 0.5;
+          col.speed = Math.random() * 1.5 + 0.6;
+        }
+      });
     }
 
-    // 2. Draw & Update Click Sparkles
+    // =========================================
+    // MODE: RAIN
+    // =========================================
+    else if (mode === "rain") {
+      rainDrops.forEach(drop => {
+        ctx.beginPath();
+        // Slanted rain at 15 degrees
+        const angle = Math.PI / 12;
+        const dx = Math.sin(angle) * drop.length;
+        const dy = Math.cos(angle) * drop.length;
+        ctx.moveTo(drop.x, drop.y);
+        ctx.lineTo(drop.x + dx, drop.y + dy);
+        ctx.strokeStyle = `rgba(${rgb},${drop.alpha})`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        drop.y += drop.speed;
+        drop.x += drop.speed * Math.tan(angle);
+        if (drop.y > height || drop.x > width) {
+          drop.x = Math.random() * width;
+          drop.y = -drop.length;
+        }
+      });
+    }
+
+    // =========================================
+    // MODE: EMBERS
+    // =========================================
+    else if (mode === "embers") {
+      for (let i = embers.length - 1; i >= 0; i--) {
+        const e = embers[i];
+        e.x += e.vx + Math.sin(Date.now() * 0.001 + i) * 0.3;
+        e.y += e.vy;
+        e.life -= e.decay;
+        e.alpha = e.life * 0.85;
+
+        if (e.life <= 0) {
+          embers[i] = spawnEmber();
+          continue;
+        }
+
+        ctx.beginPath();
+        ctx.arc(e.x, e.y, e.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${rgb},${e.alpha})`;
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = `rgba(${rgb},0.8)`;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+    }
+
+    // =========================================
+    // MODE: STARS (default constellation)
+    // =========================================
+    else if (mode === "stars" || mode === "snow") {
+      const isSnow = mode === "snow";
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+
+        if (isSnow) {
+          p.y += Math.abs(p.speedY) + 0.5;
+          p.x += Math.sin(Date.now() * 0.001 + i) * 0.25;
+        } else {
+          p.x += p.speedX;
+          p.y += p.speedY;
+        }
+
+        if (p.x < 0) p.x = width;
+        if (p.x > width) p.x = 0;
+        if (p.y < 0) p.y = height;
+        if (p.y > height) p.y = isSnow ? 0 : height;
+
+        p.alpha += Math.sin(Date.now() * p.pulseSpeed) * 0.005;
+        const displayAlpha = Math.max(0.1, Math.min(0.9, p.alpha));
+
+        // Cursor attraction lines
+        const dxM = globalMouse.x - p.x;
+        const dyM = globalMouse.y - p.y;
+        const distM = Math.sqrt(dxM * dxM + dyM * dyM);
+        if (distM < 120 && !isSnow) {
+          ctx.beginPath();
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(globalMouse.x, globalMouse.y);
+          ctx.strokeStyle = `rgba(${rgb},${0.2 * (1 - distM / 120)})`;
+          ctx.lineWidth = 0.7;
+          ctx.stroke();
+        }
+
+        if (isSnow) {
+          // Snowflake-ish shape
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius * 1.2, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(${rgb},${displayAlpha})`;
+          ctx.fill();
+        } else {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(${rgb},${displayAlpha})`;
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = `rgba(${rgb},0.9)`;
+          ctx.fill();
+          ctx.shadowBlur = 0;
+        }
+      }
+    }
+
+    drawSparkles();
+    requestAnimationFrame(render);
+  }
+
+  function drawSparkles() {
+    // Click Sparkles
     for (let i = sparkleParticles.length - 1; i >= 0; i--) {
       const sp = sparkleParticles[i];
       sp.x += sp.vx;
       sp.y += sp.vy;
-      sp.vy += 0.04; // subtle gravity
+      sp.vy += 0.045;
       sp.alpha -= sp.decay;
-
-      if (sp.alpha <= 0) {
-        sparkleParticles.splice(i, 1);
-        continue;
-      }
-
+      if (sp.alpha <= 0) { sparkleParticles.splice(i, 1); continue; }
       ctx.beginPath();
       ctx.arc(sp.x, sp.y, sp.radius, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(255, 255, 255, ${sp.alpha})`;
-      ctx.shadowBlur = 12;
-      ctx.shadowColor = "rgba(255, 255, 255, 1)";
+      ctx.fillStyle = `rgba(255,255,255,${sp.alpha})`;
+      ctx.shadowBlur = 14;
+      ctx.shadowColor = "rgba(255,255,255,1)";
       ctx.fill();
+      ctx.shadowBlur = 0;
     }
-
-    requestAnimationFrame(render);
   }
 
   render();
+}
+
+// ----------------------------------------------------
+// CUSTOM CROSSHAIR CURSOR (Guns.lol Style)
+// ----------------------------------------------------
+function initCustomCursor() {
+  const crosshair = document.getElementById("guns-crosshair");
+  if (!crosshair) return;
+
+  let cursorX = -200, cursorY = -200;
+  let isClicking = false;
+
+  function moveCursor(e) {
+    const x = e.clientX;
+    const y = e.clientY;
+    cursorX = x;
+    cursorY = y;
+    crosshair.style.transform = `translate(${x}px, ${y}px) ${isClicking ? "scale(0.78)" : "scale(1)"}`;
+  }
+
+  document.addEventListener("mousemove", moveCursor);
+
+  document.addEventListener("mousedown", () => {
+    isClicking = true;
+    crosshair.classList.add("is-clicking");
+    crosshair.style.transform = `translate(${cursorX}px, ${cursorY}px) scale(0.78)`;
+  });
+
+  document.addEventListener("mouseup", () => {
+    isClicking = false;
+    crosshair.classList.remove("is-clicking");
+    crosshair.style.transform = `translate(${cursorX}px, ${cursorY}px) scale(1)`;
+  });
+
+  document.addEventListener("mouseleave", () => {
+    crosshair.style.opacity = "0";
+  });
+
+  document.addEventListener("mouseenter", () => {
+    if (activeConfig.effects?.customCursor !== false) {
+      crosshair.style.opacity = "1";
+    }
+  });
 }

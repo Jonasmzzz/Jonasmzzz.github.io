@@ -73,6 +73,10 @@ const CONFIG = {
     "glowColor": "#ffffff",
     "audioVisualizer": true,
     "ambientMode": "stars",
-    "glassBlur": 24
+    "glassBlur": 24,
+    "customCursor": true,
+    "cursorSpotlight": true,
+    "clickSparkles": true,
+    "enableSfx": true
   }
 };

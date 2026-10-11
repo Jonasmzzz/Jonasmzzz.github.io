@@ -52,7 +52,10 @@
 
       <!-- User Information -->
       <div class="user-meta">
-        <h1 id="profile-name" class="username">Jonas</h1>
+        <div class="username-wrapper">
+          <h1 id="profile-name" class="username">Jonas</h1>
+          <span class="user-badge" id="profile-badge">VIP</span>
+        </div>
         
         <div class="location-badge" id="profile-location">
           <svg class="icon-pin" viewBox="0 0 24 24" fill="currentColor">
@@ -129,6 +132,18 @@
     </svg>
   </button>
 
+  <!-- Custom Guns.lol Target Crosshair Cursor -->
+  <div id="guns-crosshair" class="guns-crosshair">
+    <div class="crosshair-dot"></div>
+    <div class="crosshair-line crosshair-top"></div>
+    <div class="crosshair-line crosshair-bottom"></div>
+    <div class="crosshair-line crosshair-left"></div>
+    <div class="crosshair-line crosshair-right"></div>
+  </div>
+
+  <!-- Global Admin Notification Toast -->
+  <div id="admin-toast" class="admin-toast hidden"></div>
+
   <!-- Master Password Prompt Modal -->
   <div id="admin-auth-modal" class="admin-modal-overlay hidden">
     <div class="admin-auth-card">
@@ -151,259 +166,488 @@
     </div>
   </div>
 
-  <!-- Massive Admin Control Panel Drawer / Modal -->
+  <!-- Massive Futuristic Admin Control Panel Dashboard -->
   <div id="admin-panel-modal" class="admin-modal-overlay hidden">
-    <div class="admin-panel-container">
+    <div class="admin-panel-container modern-dashboard">
       
-      <!-- Panel Header -->
-      <div class="panel-header">
-        <div class="panel-header-left">
-          <div class="panel-badge">CONTROL PANEL</div>
-          <h2>Admin Dashboard</h2>
-        </div>
-        <button id="btn-close-panel" class="btn-icon-close" title="Schließen">&times;</button>
-      </div>
-
-      <!-- Navigation Tabs -->
-      <div class="panel-tabs">
-        <button class="panel-tab-btn active" data-tab="tab-media">🎬 Medien & Sound</button>
-        <button class="panel-tab-btn" data-tab="tab-profile">👤 Profil & Info</button>
-        <button class="panel-tab-btn" data-tab="tab-links">🔗 Social Links</button>
-        <button class="panel-tab-btn" data-tab="tab-effects">✨ Effekte & Design</button>
-        <button class="panel-tab-btn" data-tab="tab-publish">🚀 Veröffentlichen</button>
-      </div>
-
-      <!-- Tab Content Area -->
-      <div class="panel-content">
-        
-        <!-- TAB 1: MEDIEN (Video & Audio) -->
-        <div class="tab-pane active" id="tab-media">
-          <div class="control-group">
-            <h3>🎬 Hintergrund-Video</h3>
-            <p class="field-hint">Lade direkt ein MP4-Video hoch oder gib eine Video-URL ein.</p>
-            
-            <div class="upload-dropzone" id="video-dropzone">
-              <input type="file" id="input-video-file" accept="video/mp4,video/webm" class="file-hidden">
-              <svg class="dropzone-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
-              <span id="video-dropzone-label">Video auswählen oder hier ablegen (MP4)</span>
-            </div>
-
-            <div class="form-row">
-              <label>Oder direkte Video-URL:</label>
-              <input type="text" id="input-video-url" class="admin-input" placeholder="https://.../mein-video.mp4">
-            </div>
+      <!-- Left Sidebar Navigation -->
+      <aside class="admin-sidebar">
+        <div class="admin-brand">
+          <div class="admin-brand-icon">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
           </div>
-
-          <div class="control-group">
-            <h3>🎵 Hintergrund-Audio / Song</h3>
-            <p class="field-hint">Lade deine Lieblings-Musik (MP3, WAV) hoch oder gib einen Link ein.</p>
-            
-            <div class="upload-dropzone" id="audio-dropzone">
-              <input type="file" id="input-audio-file" accept="audio/mpeg,audio/wav,audio/ogg" class="file-hidden">
-              <svg class="dropzone-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
-              <span id="audio-dropzone-label">Audio-Datei auswählen (MP3 / WAV)</span>
-            </div>
-
-            <div class="form-row">
-              <label>Oder direkte Musik-URL:</label>
-              <input type="text" id="input-audio-url" class="admin-input" placeholder="assets/bg-audio.mp3 oder https://...">
-            </div>
-
-            <div class="grid-2">
-              <div class="form-row">
-                <label>Songtitel:</label>
-                <input type="text" id="input-track-title" class="admin-input" placeholder="z. B. Lost In Love">
-              </div>
-              <div class="form-row">
-                <label>Künstler / Artist:</label>
-                <input type="text" id="input-track-artist" class="admin-input" placeholder="z. B. Jonas">
-              </div>
-            </div>
-
-            <div class="form-row">
-              <label>Standard-Lautstärke beim Start:</label>
-              <div class="range-wrap">
-                <input type="range" id="input-default-volume" min="0" max="1" step="0.05" class="admin-slider">
-                <span id="volume-val-display" class="slider-val">50%</span>
-              </div>
-            </div>
+          <div class="admin-brand-text">
+            <span class="brand-title">JONAS DASHBOARD</span>
+            <span class="brand-badge">CONTROL PRO</span>
           </div>
         </div>
 
-        <!-- TAB 2: PROFIL -->
-        <div class="tab-pane" id="tab-profile">
-          <div class="control-group">
-            <h3>👤 Profil-Daten</h3>
+        <nav class="admin-nav panel-tabs">
+          <button class="nav-item panel-tab-btn active" data-tab="tab-presets">
+            <span class="nav-icon">🎨</span>
+            <span class="nav-text">Theme Presets</span>
+            <span class="nav-chip">Hot</span>
+          </button>
+          <button class="nav-item panel-tab-btn" data-tab="tab-profile">
+            <span class="nav-icon">👤</span>
+            <span class="nav-text">Profil & Badge</span>
+          </button>
+          <button class="nav-item panel-tab-btn" data-tab="tab-media">
+            <span class="nav-icon">🎬</span>
+            <span class="nav-text">Medien & Sound</span>
+          </button>
+          <button class="nav-item panel-tab-btn" data-tab="tab-links">
+            <span class="nav-icon">🔗</span>
+            <span class="nav-text">Social Links</span>
+          </button>
+          <button class="nav-item panel-tab-btn" data-tab="tab-effects">
+            <span class="nav-icon">✨</span>
+            <span class="nav-text">Effekte & Design</span>
+          </button>
+          <button class="nav-item panel-tab-btn" data-tab="tab-interact">
+            <span class="nav-icon">🎯</span>
+            <span class="nav-text">Cursor & Sound</span>
+          </button>
+          <button class="nav-item panel-tab-btn" data-tab="tab-discord">
+            <span class="nav-icon">🔮</span>
+            <span class="nav-text">Discord Lanyard</span>
+          </button>
+          <button class="nav-item panel-tab-btn" data-tab="tab-publish">
+            <span class="nav-icon">🚀</span>
+            <span class="nav-text">GitHub & Cloud</span>
+          </button>
+        </nav>
 
-            <div class="grid-2">
-              <div class="form-row">
-                <label>Profil-Avatar (Bild):</label>
-                <input type="file" id="input-avatar-file" accept="image/*" class="admin-input-file">
-              </div>
-              <div class="form-row">
-                <label>Oder Bild-URL:</label>
-                <input type="text" id="input-avatar-url" class="admin-input" placeholder="assets/avatar.jpg">
-              </div>
-            </div>
-
-            <div class="grid-2">
-              <div class="form-row">
-                <label>Name:</label>
-                <input type="text" id="input-profile-name" class="admin-input" placeholder="Jonas">
-              </div>
-              <div class="form-row">
-                <label>Standort / Tagline:</label>
-                <input type="text" id="input-profile-location" class="admin-input" placeholder="FFM">
-              </div>
-            </div>
-
-            <div class="form-row">
-              <label>Aufrufzähler (Global Live):</label>
-              <input type="number" id="input-profile-views" class="admin-input" placeholder="305">
-              <p class="field-hint" style="margin-top: 4px; font-size: 0.78rem; color: rgba(255,255,255,0.5);">Wird global über die Live-API synchronisiert und bei jedem Profilaufruf weltweit erhöht.</p>
-            </div>
-
-            <div style="margin: 20px 0 16px; border-top: 1px solid rgba(255,255,255,0.1);"></div>
-
-            <h3 style="margin-bottom: 6px;">🔮 Discord Live-Integration (Lanyard)</h3>
-            <p class="field-hint" style="margin-bottom: 14px;">Zeigt dein Discord-Profilbild, deinen Status (Online/Abwesend/DND) und Rich Presence (Spiele/Spotify) live auf der Seite an.</p>
-
-            <div class="form-row">
-              <label>Discord User ID:</label>
-              <input type="text" id="input-discord-id" class="admin-input" placeholder="453756683886264321">
-            </div>
-
-            <div class="grid-2">
-              <div class="form-row">
-                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-                  <input type="checkbox" id="check-discord-avatar" checked>
-                  <span>Live Discord-Avatar</span>
-                </label>
-              </div>
-              <div class="form-row">
-                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-                  <input type="checkbox" id="check-discord-presence" checked>
-                  <span>Rich Presence (Spiele / Spotify)</span>
-                </label>
-              </div>
-            </div>
-          </div>
+        <div class="sidebar-footer">
+          <button id="btn-save-panel" class="btn-sidebar-save">
+            <span>💾 Änderungen speichern</span>
+            <kbd>Ctrl+S</kbd>
+          </button>
+          <button id="btn-reset-defaults" class="btn-sidebar-reset">
+            Standardwerte wiederherstellen
+          </button>
         </div>
+      </aside>
 
-        <!-- TAB 3: SOCIAL LINKS -->
-        <div class="tab-pane" id="tab-links">
-          <div class="control-group">
-            <div class="split-header">
-              <h3>🔗 Linksammlung verwalten</h3>
-              <button id="btn-add-link" class="btn-accent-sm">+ Link hinzufügen</button>
-            </div>
-            <p class="field-hint">Klicke auf Bearbeiten, um Plattformen, URLs oder Beschriftungen anzupassen.</p>
-
-            <div id="admin-links-list" class="admin-links-list">
-              <!-- Dynamische Liste der Links -->
-            </div>
+      <!-- Right Main Content Area -->
+      <main class="admin-main">
+        <header class="admin-main-header">
+          <div class="header-titles">
+            <h2 id="admin-current-section-title">Theme Presets</h2>
+            <p id="admin-current-section-desc">Passe das Design deiner Profilseite mit 1 Klick an.</p>
           </div>
-        </div>
+          <div class="header-actions">
+            <span class="live-status-pill"><span class="pulse-dot"></span> Live Ready</span>
+            <button id="btn-close-panel" class="btn-icon-close" title="Schließen (Esc)">&times;</button>
+          </div>
+        </header>
 
-        <!-- TAB 4: EFFEKTE & DESIGN -->
-        <div class="tab-pane" id="tab-effects">
-          <div class="control-group">
-            <h3>✨ Visuelle Effekte & Design</h3>
+        <div class="admin-main-body panel-content">
+          
+          <!-- TAB 0: THEME PRESETS -->
+          <div class="tab-pane active" id="tab-presets">
+            <div class="admin-card">
+              <div class="admin-card-header">
+                <h3>🎨 1-Klick Farb- & Design-Presets</h3>
+                <p>Wähle einen Style aus – alle Farben, Partikel, Blur und Badges werden sofort übernommen!</p>
+              </div>
 
-            <div class="form-row">
-              <label>Click-to-Enter Begrüßungstext:</label>
-              <input type="text" id="input-splash-text" class="admin-input" placeholder="[ click anywhere to enter ]">
-            </div>
+              <div class="presets-grid">
+                <div class="preset-card" data-preset="cyberpunk">
+                  <div class="preset-color-strip" style="background: linear-gradient(90deg, #a855f7, #6366f1);"></div>
+                  <div class="preset-card-title">💜 Cyberpunk Neon</div>
+                  <p class="field-hint" style="margin: 4px 0 8px;">Neon Purple Glow mit Matrix-Partikeln & VIP-Badge.</p>
+                  <div class="preset-card-tags">
+                    <span class="preset-tag">#a855f7</span>
+                    <span class="preset-tag">Matrix</span>
+                    <span class="preset-tag">24px Blur</span>
+                  </div>
+                </div>
 
-            <div class="grid-2">
-              <div class="form-row">
-                <label>Glow-Farbe (Akzent):</label>
-                <div class="color-picker-row">
-                  <input type="color" id="input-glow-color" value="#ffffff" class="admin-color-picker">
-                  <span id="glow-color-preview" class="color-hex-label">#ffffff</span>
+                <div class="preset-card" data-preset="crimson">
+                  <div class="preset-color-strip" style="background: linear-gradient(90deg, #ff0033, #990000);"></div>
+                  <div class="preset-card-title">🩸 Blood Crimson</div>
+                  <p class="field-hint" style="margin: 4px 0 8px;">Dunkles Blutrot mit glühenden Flammen-Glutpartikeln.</p>
+                  <div class="preset-card-tags">
+                    <span class="preset-tag">#ff0033</span>
+                    <span class="preset-tag">Embers</span>
+                    <span class="preset-tag">IMMORTAL</span>
+                  </div>
+                </div>
+
+                <div class="preset-card" data-preset="ice">
+                  <div class="preset-color-strip" style="background: linear-gradient(90deg, #00f0ff, #3b82f6);"></div>
+                  <div class="preset-card-title">🧊 Ice Glacier</div>
+                  <p class="field-hint" style="margin: 4px 0 8px;">Frostiges Eis-Cyan mit sanftem Schneefall & Kälte-Look.</p>
+                  <div class="preset-card-tags">
+                    <span class="preset-tag">#00f0ff</span>
+                    <span class="preset-tag">Snow</span>
+                    <span class="preset-tag">COLD</span>
+                  </div>
+                </div>
+
+                <div class="preset-card" data-preset="gold">
+                  <div class="preset-color-strip" style="background: linear-gradient(90deg, #ffd700, #f59e0b);"></div>
+                  <div class="preset-card-title">👑 Luxury Gold</div>
+                  <p class="field-hint" style="margin: 4px 0 8px;">Edles Kaiser-Gold mit Sternen-Konstellationen & ROYAL-Badge.</p>
+                  <div class="preset-card-tags">
+                    <span class="preset-tag">#ffd700</span>
+                    <span class="preset-tag">Stars</span>
+                    <span class="preset-tag">ROYAL</span>
+                  </div>
+                </div>
+
+                <div class="preset-card" data-preset="stealth">
+                  <div class="preset-color-strip" style="background: linear-gradient(90deg, #ffffff, #71717a);"></div>
+                  <div class="preset-card-title">🖤 Monochrome Stealth</div>
+                  <p class="field-hint" style="margin: 4px 0 8px;">Reines Weiß & Tiefschwarz mit sanftem Regen-Effekt.</p>
+                  <div class="preset-card-tags">
+                    <span class="preset-tag">#ffffff</span>
+                    <span class="preset-tag">Rain</span>
+                    <span class="preset-tag">VERIFIED</span>
+                  </div>
                 </div>
               </div>
-              <div class="form-row">
-                <label>Hintergrund-Partikel:</label>
-                <select id="select-ambient-particles" class="admin-select">
-                  <option value="stars">✨ Sterne & Sternenstaub</option>
-                  <option value="snow">❄️ Subtiler Schnee</option>
-                  <option value="none">🚫 Keine Partikel (Nur Video)</option>
-                </select>
-              </div>
             </div>
+          </div>
 
-            <div class="grid-2">
-              <div class="form-row">
-                <label>Frosted-Glass Unschärfe (Blur):</label>
-                <input type="range" id="input-glass-blur" min="5" max="45" step="1" value="24" class="admin-slider">
+          <!-- TAB 1: PROFIL & BADGE -->
+          <div class="tab-pane" id="tab-profile">
+            <div class="admin-card">
+              <div class="admin-card-header">
+                <h3>👤 Profil-Informationen</h3>
+                <p>Passe deinen Namen, dein Abzeichen und deinen Standort an.</p>
               </div>
-              <div class="form-row">
-                <label>Audio-Equalizer:</label>
-                <select id="select-equalizer-toggle" class="admin-select">
-                  <option value="true">Aktiviert (Tanzende Balken)</option>
-                  <option value="false">Deaktiviert</option>
-                </select>
+
+              <div class="grid-2">
+                <div class="form-row">
+                  <label>Profil-Avatar Bilddatei:</label>
+                  <input type="file" id="input-avatar-file" accept="image/*" class="admin-input-file">
+                </div>
+                <div class="form-row">
+                  <label>Oder direkte Bild-URL:</label>
+                  <input type="text" id="input-avatar-url" class="admin-input" placeholder="assets/avatar.jpg">
+                </div>
+              </div>
+
+              <div class="grid-2">
+                <div class="form-row">
+                  <label>Profilname:</label>
+                  <input type="text" id="input-profile-name" class="admin-input" placeholder="Jonas">
+                </div>
+                <div class="form-row">
+                  <label>Standort / Tagline:</label>
+                  <input type="text" id="input-profile-location" class="admin-input" placeholder="FFM">
+                </div>
+              </div>
+
+              <div class="grid-2">
+                <div class="form-row">
+                  <label>Profil-Badge (VIP / PRO / 👑 / DEV):</label>
+                  <input type="text" id="input-profile-badge" class="admin-input" placeholder="VIP">
+                </div>
+                <div class="form-row">
+                  <label>Aufrufzähler (Global Live):</label>
+                  <div style="display:flex; gap:8px;">
+                    <input type="number" id="input-profile-views" class="admin-input" placeholder="305">
+                    <button type="button" id="btn-test-view" class="btn-accent-sm" style="white-space:nowrap;" title="Simuliert einen weltweiten Aufruf">+1 Test</button>
+                  </div>
+                  <p class="field-hint" style="margin-top: 4px; font-size: 0.76rem; color: #4ade80;">🟢 Live synchronisiert mit globaler API (CountAPI).</p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- TAB 5: VERÖFFENTLICHEN / GITHUB SYNC -->
-        <div class="tab-pane" id="tab-publish">
-          <div class="control-group">
-            <h3>🚀 Weltweit auf GitHub Pages live schalten</h3>
-            <p class="field-hint">
-              Lokal siehst du alle Änderungen sofort. Wenn du sie für alle Besucher weltweit auf 
-              <strong>jonasmzzz.github.io</strong> veröffentlichen willst, kannst du hier deinen GitHub-Token hinterlegen:
-            </p>
+          <!-- TAB 2: MEDIEN & AUDIO -->
+          <div class="tab-pane" id="tab-media">
+            <div class="admin-card">
+              <div class="admin-card-header">
+                <h3>🎬 Hintergrund-Video</h3>
+                <p>Lade direkt ein MP4-Video hoch oder gib eine Video-URL ein.</p>
+              </div>
+              
+              <div class="upload-dropzone" id="video-dropzone">
+                <input type="file" id="input-video-file" accept="video/mp4,video/webm" class="file-hidden">
+                <svg class="dropzone-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
+                <span id="video-dropzone-label">Video auswählen oder hier ablegen (MP4)</span>
+              </div>
 
-            <div class="form-row">
-              <label>GitHub Personal Access Token (PAT):</label>
-              <input type="password" id="input-github-token" class="admin-input" placeholder="ghp_... (wird nur lokal im Browser gespeichert)">
-              <span class="field-note">
-                Tipp: Erstelle auf <a href="https://github.com/settings/tokens" target="_blank" style="color: #60a5fa;">GitHub Tokens</a> ein Token mit der Berechtigung <code>repo</code>.
-              </span>
-            </div>
-
-            <div class="action-buttons-grid">
-              <button id="btn-github-push" class="btn-publish-big">
-                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2z"/></svg>
-                <span>🚀 Jetzt weltweit auf GitHub veröffentlichen</span>
-              </button>
-
-              <button id="btn-download-config" class="btn-secondary-full">
-                📥 config.js herunterladen (manueller Export)
-              </button>
-            </div>
-
-            <div id="github-sync-status" class="sync-status hidden"></div>
-          </div>
-
-          <div class="control-group">
-            <h3>🔒 Sicherheit & Passwort ändern</h3>
-            <div class="grid-2">
               <div class="form-row">
-                <label>Neues Admin-Passwort:</label>
-                <input type="password" id="input-new-password" class="admin-input" placeholder="Neues Passwort">
-              </div>
-              <div class="form-row" style="display:flex; align-items:flex-end;">
-                <button id="btn-save-new-password" class="btn-accent-sm" style="width:100%;">Passwort speichern</button>
+                <label>Oder direkte Video-URL:</label>
+                <input type="text" id="input-video-url" class="admin-input" placeholder="https://.../mein-video.mp4">
               </div>
             </div>
-            <div id="password-change-status" class="field-note hidden"></div>
+
+            <div class="admin-card">
+              <div class="admin-card-header">
+                <h3>🎵 Hintergrund-Audio / Song</h3>
+                <p>Lade Musik (MP3, WAV) hoch oder gib einen Songlink an.</p>
+              </div>
+              
+              <div class="upload-dropzone" id="audio-dropzone">
+                <input type="file" id="input-audio-file" accept="audio/mpeg,audio/wav,audio/ogg" class="file-hidden">
+                <svg class="dropzone-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+                <span id="audio-dropzone-label">Audio-Datei auswählen (MP3 / WAV)</span>
+              </div>
+
+              <div class="form-row">
+                <label>Oder direkte Musik-URL:</label>
+                <input type="text" id="input-audio-url" class="admin-input" placeholder="assets/bg-audio.mp3 oder https://...">
+              </div>
+
+              <div class="grid-2">
+                <div class="form-row">
+                  <label>Songtitel:</label>
+                  <input type="text" id="input-track-title" class="admin-input" placeholder="z. B. 700 Pferde">
+                </div>
+                <div class="form-row">
+                  <label>Künstler / Artist:</label>
+                  <input type="text" id="input-track-artist" class="admin-input" placeholder="z. B. Reezy">
+                </div>
+              </div>
+
+              <div class="grid-2">
+                <div class="form-row">
+                  <label>Standard-Lautstärke:</label>
+                  <div class="range-wrap">
+                    <input type="range" id="input-default-volume" min="0" max="1" step="0.05" class="admin-slider">
+                    <span id="volume-val-display" class="slider-val">50%</span>
+                  </div>
+                </div>
+                <div class="form-row" style="display:flex; align-items:flex-end;">
+                  <button type="button" id="btn-preview-audio" class="btn-secondary" style="width:100%; display:flex; align-items:center; justify-content:center; gap:8px;">
+                    <span>▶️ Song im Dashboard testen</span>
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
 
-      </div>
+          <!-- TAB 3: SOCIAL LINKS -->
+          <div class="tab-pane" id="tab-links">
+            <div class="admin-card">
+              <div class="admin-card-header">
+                <h3>⚡ Schnell-Hinzufügen (Quick Add)</h3>
+                <p>Klicke auf eine Plattform, um sie sofort mit Icon hinzuzufügen:</p>
+              </div>
 
-      <!-- Panel Footer -->
-      <div class="panel-footer">
-        <button id="btn-reset-defaults" class="btn-danger-outline">Zurücksetzen</button>
-        <div class="panel-footer-right">
-          <button id="btn-save-panel" class="btn-primary-big">💾 Änderungen anwenden</button>
+              <div class="quick-add-chips">
+                <button type="button" class="chip-btn" data-add-platform="spotify">🎵 Spotify</button>
+                <button type="button" class="chip-btn" data-add-platform="instagram">📸 Instagram</button>
+                <button type="button" class="chip-btn" data-add-platform="snapchat">👻 Snapchat</button>
+                <button type="button" class="chip-btn" data-add-platform="github">💻 GitHub</button>
+                <button type="button" class="chip-btn" data-add-platform="discord">💬 Discord</button>
+                <button type="button" class="chip-btn" data-add-platform="tiktok">🎬 TikTok</button>
+                <button type="button" class="chip-btn" data-add-platform="youtube">📺 YouTube</button>
+                <button type="button" class="chip-btn" data-add-platform="twitch">💜 Twitch</button>
+                <button type="button" class="chip-btn" data-add-platform="steam">🎮 Steam</button>
+                <button type="button" class="chip-btn" data-add-platform="telegram">✈️ Telegram</button>
+                <button type="button" class="chip-btn" data-add-platform="twitter">❌ Twitter / X</button>
+              </div>
+
+              <div class="split-header" style="margin-top: 14px; margin-bottom: 12px;">
+                <h4 style="font-size:0.9rem; color:#fff; margin:0;">Aktuelle Linkliste</h4>
+                <button id="btn-add-link" class="btn-accent-sm">+ Eigener Link</button>
+              </div>
+
+              <div id="admin-links-list" class="admin-links-list">
+                <!-- Dynamische Liste der Links -->
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 4: EFFEKTE & SHADER -->
+          <div class="tab-pane" id="tab-effects">
+            <div class="admin-card">
+              <div class="admin-card-header">
+                <h3>✨ Visuelle Effekte & Design</h3>
+                <p>Passe Glow-Farbe, Ambient-Partikel und Frosted Glass an.</p>
+              </div>
+
+              <div class="form-row">
+                <label>Click-to-Enter Begrüßungstext:</label>
+                <input type="text" id="input-splash-text" class="admin-input" placeholder="[ click anywhere to enter ]">
+              </div>
+
+              <div class="grid-2">
+                <div class="form-row">
+                  <label>Glow-Farbe (Akzent):</label>
+                  <div class="color-picker-row">
+                    <input type="color" id="input-glow-color" value="#ffffff" class="admin-color-picker">
+                    <span id="glow-color-preview" class="color-hex-label">#ffffff</span>
+                  </div>
+                  <div style="display:flex; gap:6px; margin-top:8px;">
+                    <span class="color-swatch-circle" data-swatch="#ffffff" style="background:#ffffff;" title="Weiß"></span>
+                    <span class="color-swatch-circle" data-swatch="#a855f7" style="background:#a855f7;" title="Neon Purple"></span>
+                    <span class="color-swatch-circle" data-swatch="#ff0033" style="background:#ff0033;" title="Blood Red"></span>
+                    <span class="color-swatch-circle" data-swatch="#00f0ff" style="background:#00f0ff;" title="Glacier Cyan"></span>
+                    <span class="color-swatch-circle" data-swatch="#ffd700" style="background:#ffd700;" title="Luxury Gold"></span>
+                    <span class="color-swatch-circle" data-swatch="#10b981" style="background:#10b981;" title="Emerald"></span>
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <label>Hintergrund-Partikel & Shader:</label>
+                  <select id="select-ambient-particles" class="admin-select">
+                    <option value="stars">✨ Sterne & Sternenstaub (Konstellationen)</option>
+                    <option value="matrix">💻 Cyberpunk Matrix Code Rain</option>
+                    <option value="rain">🌧️ Cineastischer Regen</option>
+                    <option value="embers">🔥 Aufsteigende Feuerglut (Embers)</option>
+                    <option value="snow">❄️ Subtiler Schneefall</option>
+                    <option value="none">🚫 Keine Partikel (Nur Video)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="grid-2">
+                <div class="form-row">
+                  <label>Frosted-Glass Unschärfe (Blur):</label>
+                  <input type="range" id="input-glass-blur" min="5" max="45" step="1" value="24" class="admin-slider">
+                </div>
+                <div class="form-row">
+                  <label>Audio-Equalizer:</label>
+                  <select id="select-equalizer-toggle" class="admin-select">
+                    <option value="true">Aktiviert (Tanzende Balken)</option>
+                    <option value="false">Deaktiviert</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 5: CURSOR & INTERAKTION -->
+          <div class="tab-pane" id="tab-interact">
+            <div class="admin-card">
+              <div class="admin-card-header">
+                <h3>🎯 Guns.lol Cursor & Klick-Effekte</h3>
+                <p>Aktiviere den legendären Guns.lol Crosshair-Zielkreuz-Mauszeiger und Effekte.</p>
+              </div>
+
+              <label class="switch-label">
+                <div>
+                  <span class="switch-text">🎯 Custom Guns.lol Crosshair Cursor</span>
+                  <span class="switch-desc">Stylisches Zielkreuz mit dynamischem Klick-Rückstoß</span>
+                </div>
+                <input type="checkbox" id="check-custom-cursor" class="switch-input" checked>
+              </label>
+
+              <label class="switch-label">
+                <div>
+                  <span class="switch-text">🔦 Cursor Spotlight Glow</span>
+                  <span class="switch-desc">Sanfter Lichtkegel folgt deiner Maus über die Karte</span>
+                </div>
+                <input type="checkbox" id="check-cursor-spotlight" class="switch-input" checked>
+              </label>
+
+              <label class="switch-label">
+                <div>
+                  <span class="switch-text">✨ Klick-Funkensprühen (Sparkles Burst)</span>
+                  <span class="switch-desc">Explosion feiner Lichtpartikel bei jedem Mausklick</span>
+                </div>
+                <input type="checkbox" id="check-click-sparkles" class="switch-input" checked>
+              </label>
+
+              <label class="switch-label">
+                <div>
+                  <span class="switch-text">🔊 UI-Soundeffekte (SFX)</span>
+                  <span class="switch-desc">Sanfte, moderne Sounds beim Hovern, Klicken und Betreten</span>
+                </div>
+                <input type="checkbox" id="check-enable-sfx" class="switch-input" checked>
+              </label>
+
+              <div style="margin-top: 12px;">
+                <button type="button" id="btn-test-sfx" class="btn-secondary" style="width:100%;">
+                  🔊 Soundeffekt jetzt probehören
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 6: DISCORD LANYARD -->
+          <div class="tab-pane" id="tab-discord">
+            <div class="admin-card">
+              <div class="admin-card-header">
+                <h3>🔮 Discord Live-Integration (Lanyard API)</h3>
+                <p>Zeigt deinen echten Discord-Status, Avatar und Spotify/Game Rich Presence live an.</p>
+              </div>
+
+              <div class="form-row">
+                <label>Deine Discord User ID:</label>
+                <input type="text" id="input-discord-id" class="admin-input" placeholder="453756683886264321">
+                <span class="field-note">Tipp: Rechtsklick auf deinen Discord-Account ➔ 'ID kopieren'.</span>
+              </div>
+
+              <div class="grid-2">
+                <label class="switch-label">
+                  <div>
+                    <span class="switch-text">Live Discord-Avatar</span>
+                    <span class="switch-desc">Nutzt automatisch dein aktuelles Discord Profilbild</span>
+                  </div>
+                  <input type="checkbox" id="check-discord-avatar" class="switch-input" checked>
+                </label>
+
+                <label class="switch-label">
+                  <div>
+                    <span class="switch-text">Rich Presence Karte</span>
+                    <span class="switch-desc">Zeigt an, was du gerade spielst oder auf Spotify hörst</span>
+                  </div>
+                  <input type="checkbox" id="check-discord-presence" class="switch-input" checked>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 7: GITHUB & CLOUD -->
+          <div class="tab-pane" id="tab-publish">
+            <div class="admin-card">
+              <div class="admin-card-header">
+                <h3>🚀 Weltweit auf GitHub Pages veröffentlichen</h3>
+                <p>Macht alle Änderungen in ca. 30 Sekunden weltweit für jeden Besucher live.</p>
+              </div>
+
+              <div class="form-row">
+                <label>GitHub Personal Access Token (PAT):</label>
+                <input type="password" id="input-github-token" class="admin-input" placeholder="ghp_... (gespeichert nur lokal)">
+                <span class="field-note">
+                  Erstelle auf <a href="https://github.com/settings/tokens" target="_blank" style="color: #60a5fa;">GitHub Tokens</a> ein Token mit der Berechtigung <code>repo</code>.
+                </span>
+              </div>
+
+              <div class="action-buttons-grid">
+                <button id="btn-github-push" class="btn-publish-big">
+                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2z"/></svg>
+                  <span>🚀 Jetzt weltweit auf GitHub veröffentlichen</span>
+                </button>
+
+                <button id="btn-download-config" class="btn-secondary-full">
+                  📥 config.js herunterladen (manueller Backup-Export)
+                </button>
+              </div>
+
+              <div id="github-sync-status" class="sync-status hidden"></div>
+            </div>
+
+            <div class="admin-card">
+              <div class="admin-card-header">
+                <h3>🔒 Sicherheit & Passwort ändern</h3>
+                <p>Ändere dein persönliches Master-Passwort für dieses Control Panel.</p>
+              </div>
+
+              <div class="grid-2">
+                <div class="form-row">
+                  <label>Neues Admin-Passwort:</label>
+                  <input type="password" id="input-new-password" class="admin-input" placeholder="Neues Passwort">
+                </div>
+                <div class="form-row" style="display:flex; align-items:flex-end;">
+                  <button id="btn-save-new-password" class="btn-accent-sm" style="width:100%;">Passwort speichern</button>
+                </div>
+              </div>
+              <div id="password-change-status" class="field-note hidden"></div>
+            </div>
+          </div>
+
         </div>
-      </div>
+      </main>
 
     </div>
   </div>
